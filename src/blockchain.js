@@ -72,9 +72,10 @@ class Blockchain {
             block.height = self.chain.length;
             self.height += 1 
             block.hash = SHA256(JSON.stringify(block)).toString();
-
-            self.chain.push(block);
-            
+            if(block.validate())
+            {
+                self.chain.push(block);
+            }            
         });
     }
 
@@ -115,9 +116,9 @@ class Blockchain {
         return new Promise(async (resolve, reject) => {
             var msgTime = parseInt(message.split(':')[1]);
             let currentTime = parseInt(new Date().getTime().toString().slice(0, -3));
-            if(msgTime-currentTime < 5)
+            if(msgTime-currentTime < 300)
             {
-                itcoinMessage.verify(message,address,signature);
+                bitcoinMessage.verify(message,address,signature);
                 let block = new BlockClass.Block({data: {"message" :  message, "address": address, "signature": signature, "star" : star}});
                
                 self._addBlock(block);
@@ -150,7 +151,7 @@ class Blockchain {
     getBlockByHeight(height) {
         let self = this;
         return new Promise((resolve, reject) => {
-            let block = self.chain.filter(p => p.height === height)[0];
+            let block = self.chain.find(p => p.height === height)[0];
             if(block){
                 resolve(block);
             } else {
@@ -187,11 +188,10 @@ class Blockchain {
     validateChain() {
         let self = this;
         let errorLog = [];
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             self.chain.forEach(function(item){
-                if(!item.validate())
+                if(!item.validate() || item.hash == item.previousBlockHash )
                     errorLog.push("Error: " + item.hash);
-
             });
             resolve(errorLog);
         }) ;
