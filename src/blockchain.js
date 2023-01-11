@@ -61,24 +61,37 @@ class Blockchain {
      * to update the `this.height`
      * Note: the symbol `_` in the method name indicates in the javascript convention 
      * that this method is a private method. 
-     */
-    _addBlock(block) {
-        let self = this;
-        return new Promise(async (resolve, reject) => {
-            if(self.chain.length > 0) 
-                block.previousBlockHash =  self.chain[self.chain.length-1].hash;
+     * let isVal = await block.validate();
 
-            block.time = new Date().getTime().toString().slice(0,-3)
-            block.height = self.chain.length;
-            self.height += 1 
-            block.hash = SHA256(JSON.stringify(block)).toString();
-            if(block.validate())
-            {
-                self.chain.push(block);
-            }   
-            this.validateChain()
-        });
-    }
+        if (!isVal) {
+        // Reject the block
+        } else {
+            // Increment height, update hash, etc.
+            // Push block to chain
+            // Resolve the block
+        }
+     */
+        _addBlock(block) {
+            let self = this;
+            return new Promise(async (resolve, reject) => {
+                if (self.chain.length > 0)
+                    block.previousBlockHash = self.chain[self.chain.length - 1].hash;
+    
+                block.time = new Date().getTime().toString().slice(0, -3)
+                block.height = self.chain.length;
+                block.hash = SHA256(JSON.stringify(block)).toString();
+                if (await block.validate()) {
+    
+                    self.height += 1
+                    self.chain.push(block);
+                    resolve(block);
+                }
+                else {
+                    resolve("block not valid");
+                }
+                
+            });
+        }
 
     /**
      * The requestMessageOwnershipVerification(address) method
