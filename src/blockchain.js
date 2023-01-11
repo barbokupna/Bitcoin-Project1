@@ -75,7 +75,8 @@ class Blockchain {
             if(block.validate())
             {
                 self.chain.push(block);
-            }            
+            }   
+            this.validateChain()
         });
     }
 
