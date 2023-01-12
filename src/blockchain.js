@@ -80,7 +80,7 @@ class Blockchain {
                 block.time = new Date().getTime().toString().slice(0, -3)
                 block.height = self.chain.length;
                 block.hash = SHA256(JSON.stringify(block)).toString();
-                if (await block.validate()) {
+                if (await validateChain()) {
     
                     self.height += 1
                     self.chain.push(block);
@@ -203,8 +203,8 @@ class Blockchain {
         let self = this;
         let errorLog = [];
         return new Promise((resolve, reject) => {
-            self.chain.forEach(function(item){
-                if(!item.validate() || item.hash == item.previousBlockHash )
+            self.chain.forEach(async function(item, i){
+                if(await !item.validate() || item.hash == item.previousBlockHash || item.previousBlockHash != item[i-1].hash )
                     errorLog.push("Error: " + item.hash);
             });
             resolve(errorLog);
